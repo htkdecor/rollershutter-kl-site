@@ -166,7 +166,91 @@ regions_data = [
     ("valencia", "Valencia")
 ]
 
-# 2. 通用页面模板
+# 2. 附近地区映射表（子页面底部仅展示附近几个地区，未列出的地区会自动从列表中补足）
+nearby_map = {
+    "aman-perdana": ["meru", "klang", "setia-alam", "kapar", "bandar-bukit-tinggi", "shah-alam"],
+    "ampang-hilir": ["ampang", "klcc", "city-centre", "pandan-indah", "keramat", "titiwangsa"],
+    "ampang": ["ampang-hilir", "pandan-indah", "pandan-jaya", "pandan-perdana", "ulu-klang", "cheras"],
+    "ara-damansara": ["subang-jaya", "glenmarie", "petaling-jaya", "tropicana", "kota-damansara", "bandar-sunway"],
+    "balakong": ["seri-kembangan", "cheras", "kajang", "bandar-sungai-long", "bandar-damai-perdana", "serdang"],
+    "bandar-botanic": ["bandar-bukit-tinggi", "klang", "pandamaran", "port-klang", "telok-panglima-garang", "kota-kemuning"],
+    "bandar-bukit-tinggi": ["bandar-botanic", "klang", "pandamaran", "port-klang", "telok-panglima-garang", "jenjarom"],
+    "bandar-damai-perdana": ["cheras", "balakong", "bandar-sungai-long", "kajang", "seri-kembangan", "desa-petaling"],
+    "bandar-menjalara": ["kepong", "sri-damansara", "desa-parkcity", "segambut", "jinjang", "taman-tun-dr-ismail"],
+    "bandar-saujana-putra": ["puchong", "putra-heights", "cyberjaya", "jenjarom", "telok-panglima-garang", "sepang"],
+    "bandar-sungai-long": ["kajang", "balakong", "cheras", "bandar-damai-perdana", "hulu-langat", "semenyih"],
+    "bandar-sunway": ["subang-jaya", "usj", "petaling-jaya", "puchong", "glenmarie", "ss2"],
+    "bandar-tasik-selatan": ["sungai-besi", "sri-petaling", "bukit-jalil", "desa-petaling", "cheras", "salak-selatan"],
+    "bangi": ["kajang", "putrajaya", "cyberjaya", "seri-kembangan", "semenyih", "sepang"],
+    "banting": ["telok-panglima-garang", "jenjarom", "morib", "pulau-carey", "sepang", "dengkil"],
+    "bangsar": ["bangsar-south", "kl-sentral", "brickfields", "damansara-heights", "kl-eco-city", "mid-valley-city"],
+    "bangsar-south": ["bangsar", "kl-eco-city", "mid-valley-city", "petaling-jaya", "taman-desa", "old-klang-road"],
+    "batu-caves": ["selayang", "gombak", "sentul", "jalan-ipoh", "kepong", "ulu-klang"],
+    "cheras": ["bandar-damai-perdana", "balakong", "ampang", "pandan-perdana", "pudu", "bandar-tasik-selatan"],
+    "cyberjaya": ["putrajaya", "puchong", "dengkil", "bangi", "seri-kembangan", "sepang"],
+    "damansara": ["damansara-heights", "kota-damansara", "mutiara-damansara", "tropicana", "petaling-jaya", "sri-hartamas"],
+    "damansara-heights": ["bangsar", "sri-hartamas", "mont-kiara", "bukit-tunku", "taman-tun-dr-ismail", "kl-sentral"],
+    "desa-parkcity": ["bandar-menjalara", "kepong", "sri-damansara", "segambut", "jinjang", "taman-tun-dr-ismail"],
+    "desa-petaling": ["sungai-besi", "sri-petaling", "kuchai-lama", "salak-selatan", "bandar-tasik-selatan", "bukit-jalil"],
+    "gombak": ["batu-caves", "selayang", "setapak", "wangsa-maju", "ulu-klang", "taman-melawati"],
+    "kajang": ["bangi", "bandar-sungai-long", "balakong", "semenyih", "putrajaya", "hulu-langat"],
+    "kepong": ["bandar-menjalara", "sri-damansara", "desa-parkcity", "jinjang", "segambut", "selayang"],
+    "klang": ["bandar-bukit-tinggi", "bandar-botanic", "port-klang", "meru", "kapar", "pandamaran"],
+    "klcc": ["city-centre", "bukit-bintang", "ampang-hilir", "kampung-baru", "jalan-sultan-ismail", "titiwangsa"],
+    "kota-damansara": ["mutiara-damansara", "tropicana", "damansara", "sungai-buloh", "ara-damansara", "petaling-jaya"],
+    "kota-kemuning": ["shah-alam", "putra-heights", "puchong", "bandar-botanic", "telok-panglima-garang", "usj"],
+    "kuchai-lama": ["old-klang-road", "oug", "sri-petaling", "sungai-besi", "taman-desa", "bukit-jalil"],
+    "mont-kiara": ["sri-hartamas", "solaris-dutamas", "segambut", "damansara-heights", "taman-tun-dr-ismail", "bukit-tunku"],
+    "mutiara-damansara": ["kota-damansara", "damansara", "tropicana", "petaling-jaya", "sri-hartamas", "bandar-sunway"],
+    "petaling-jaya": ["ss2", "damansara", "subang-jaya", "bandar-sunway", "bangsar-south", "taman-tun-dr-ismail"],
+    "port-klang": ["klang", "pandamaran", "bandar-bukit-tinggi", "pulau-indah", "bandar-botanic", "kapar"],
+    "puchong": ["subang-jaya", "usj", "seri-kembangan", "puncak-jalil", "putra-heights", "cyberjaya"],
+    "putrajaya": ["cyberjaya", "bangi", "kajang", "seri-kembangan", "dengkil", "sepang"],
+    "rawang": ["kundang", "serendah", "selayang", "batang-kali", "kuang", "kota-emerald"],
+    "selayang": ["batu-caves", "kepong", "gombak", "rawang", "jinjang", "sentul"],
+    "semenyih": ["kajang", "bangi", "beranang", "bandar-sungai-long", "hulu-langat", "dengkil"],
+    "seri-kembangan": ["balakong", "puchong", "puncak-jalil", "bukit-jalil", "serdang", "cyberjaya"],
+    "setia-alam": ["shah-alam", "meru", "aman-perdana", "klang", "bukit-jelutong", "setia-eco-park"],
+    "shah-alam": ["glenmarie", "subang-jaya", "kota-kemuning", "setia-alam", "bukit-jelutong", "klang"],
+    "sri-hartamas": ["mont-kiara", "solaris-dutamas", "damansara-heights", "taman-tun-dr-ismail", "segambut", "bukit-tunku"],
+    "sri-petaling": ["bukit-jalil", "sungai-besi", "kuchai-lama", "oug", "desa-petaling", "seri-kembangan"],
+    "subang-jaya": ["usj", "bandar-sunway", "puchong", "glenmarie", "petaling-jaya", "shah-alam"],
+    "sungai-besi": ["sri-petaling", "desa-petaling", "bandar-tasik-selatan", "kuchai-lama", "bukit-jalil", "salak-selatan"],
+    "sungai-buloh": ["kota-damansara", "kuang", "kundang", "valencia", "sierra-mas", "subang-bestari"],
+    "taman-tun-dr-ismail": ["damansara", "damansara-heights", "mont-kiara", "sri-hartamas", "petaling-jaya", "bandar-menjalara"],
+    "usj": ["subang-jaya", "bandar-sunway", "puchong", "putra-heights", "shah-alam", "glenmarie"],
+    "wangsa-maju": ["setapak", "setiawangsa", "keramat", "taman-melawati", "ulu-klang", "gombak"],
+}
+
+region_lookup = {slug: name for slug, name in regions_data}
+
+
+def build_nearby_html(current_slug, max_items=6):
+    selected_slugs = []
+    for candidate in nearby_map.get(current_slug, []):
+        if candidate != current_slug and candidate in region_lookup and candidate not in selected_slugs:
+            selected_slugs.append(candidate)
+        if len(selected_slugs) == max_items:
+            break
+
+    if len(selected_slugs) < max_items:
+        all_slugs = [s for s, _ in regions_data if s != current_slug]
+        start_idx = next((i for i, (s, _) in enumerate(regions_data) if s == current_slug), 0)
+        ordered = all_slugs[start_idx:] + all_slugs[:start_idx]
+        for s in ordered:
+            if s not in selected_slugs:
+                selected_slugs.append(s)
+            if len(selected_slugs) == max_items:
+                break
+
+    cards = [
+        f'    <div class="col"><a href="{DOMAIN}/{s}/" class="btn btn-sm btn-outline-secondary w-100 text-truncate">{region_lookup[s]}</a></div>'
+        for s in selected_slugs
+    ]
+    return "\n".join(cards), len(selected_slugs)
+
+
+# 3. 通用页面模板
 PAGE_TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -312,18 +396,17 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- 折叠隐藏的雪隆地区链接矩阵 -->
         <section class="py-5 bg-light border-top mt-5">
             <div class="container text-center">
-                <h4 class="fw-bold mb-3 text-dark"><i class="fas fa-map-marked-alt text-warning me-2"></i>Serviced Areas in Selangor &amp; Kuala Lumpur</h4>
-                <p class="text-muted small mb-3">We provide professional roller shutter installation and urgent repair across all major districts and industrial parks in Klang Valley:</p>
-                
+                <h4 class="fw-bold mb-3 text-dark"><i class="fas fa-map-marked-alt text-warning me-2"></i>{areas_heading}</h4>
+                <p class="text-muted small mb-3">{areas_desc}</p>
+
                 <button class="btn btn-warning fw-bold text-dark rounded-pill px-4" type="button" data-bs-toggle="collapse" data-bs-target="#allServicedAreas" aria-expanded="false" aria-controls="allServicedAreas">
-                    Show All Serviced Areas (查看所有服务地区 - {total_count})
+                    {areas_button_text} ({total_count})
                 </button>
-                
+
                 <div class="collapse mt-4" id="allServicedAreas">
-                    <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-2">
+                    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-3 g-2 justify-content-center">
                         {areas_html}
                     </div>
                 </div>
@@ -354,15 +437,15 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
 </html>
 """
 
-# 3. 拼装所有地区卡片的 HTML 矩阵
-areas_html_list = [
+# 4. 拼装主页使用的全部地区卡片 HTML 矩阵
+all_areas_html_list = [
     f'    <div class="col"><a href="{DOMAIN}/{s}/" class="btn btn-sm btn-outline-secondary w-100 text-truncate">{n}</a></div>'
     for s, n in regions_data
 ]
-combined_areas_html = "\n".join(areas_html_list)
+combined_all_areas_html = "\n".join(all_areas_html_list)
 total_areas = len(regions_data)
 
-# 4. 生成根目录主页 (index.html)
+# 5. 生成根目录主页 (index.html) - 保留全部地区入口
 home_wa_text = urllib.parse.quote("Hi, I need roller shutter service in Selangor / KL")
 home_html = PAGE_TEMPLATE.format(
     domain=DOMAIN,
@@ -374,20 +457,25 @@ home_html = PAGE_TEMPLATE.format(
     h1_text="Selangor & KL Roller Shutter 017-431 5233 CALL HTK",
     img_prefix="",
     wa_text=home_wa_text,
+    areas_heading="Serviced Areas in Selangor &amp; Kuala Lumpur",
+    areas_desc="We provide professional roller shutter installation and urgent repair across all major districts and industrial parks in Klang Valley:",
+    areas_button_text="Show All Serviced Areas (查看所有服务地区)",
     total_count=total_areas,
-    areas_html=combined_areas_html
+    areas_html=combined_all_areas_html
 )
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(home_html)
 
-# 5. 循环生成各地区子页 & 收集 Sitemap URLs
+# 6. 循环生成各地区子页（底部仅保留附近 6 个地区）& 收集 Sitemap URLs
 sitemap_urls = [f"  <url><loc>{DOMAIN}/</loc></url>"]
 
 for slug, name in regions_data:
     os.makedirs(slug, exist_ok=True)
     file_path = os.path.join(slug, "index.html")
     wa_text = urllib.parse.quote(f"Hi, I need roller shutter service in {name}")
-    
+
+    nearby_html, nearby_count = build_nearby_html(slug, max_items=6)
+
     breadcrumb_item2 = f""",
           {{
             "@type": "ListItem",
@@ -406,8 +494,11 @@ for slug, name in regions_data:
         h1_text=f"{name} Roller Shutter 017-431 5233 CALL HTK",
         img_prefix="../",
         wa_text=wa_text,
-        total_count=total_areas,
-        areas_html=combined_areas_html
+        areas_heading=f"Nearby Serviced Areas Around {name}",
+        areas_desc=f"We also cover nearby areas surrounding {name} for roller shutter installation and urgent repair:",
+        areas_button_text="Show Nearby Areas (查看附近服务地区)",
+        total_count=nearby_count,
+        areas_html=nearby_html
     )
 
     with open(file_path, "w", encoding="utf-8") as f:
@@ -415,7 +506,7 @@ for slug, name in regions_data:
 
     sitemap_urls.append(f"  <url><loc>{DOMAIN}/{slug}/</loc></url>")
 
-# 6. 自动生成精准无死链的 sitemap.xml
+# 7. 自动生成精准无死链的 sitemap.xml
 sitemap_content = '<?xml version="1.0" encoding="UTF-8"?>\n'
 sitemap_content += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 sitemap_content += "\n".join(sitemap_urls) + "\n"
@@ -424,4 +515,4 @@ sitemap_content += '</urlset>'
 with open("sitemap.xml", "w", encoding="utf-8") as f:
     f.write(sitemap_content)
 
-print(f"成功生成主页、{total_areas} 个雪隆区子页面，以及对应的 sitemap.xml！")
+print(f"成功生成主页、{total_areas} 个子页面（每页附近 {6} 个地区），以及对应的 sitemap.xml！")
