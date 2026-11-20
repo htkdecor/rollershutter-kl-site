@@ -339,7 +339,7 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
             <h1 class="display-4 fw-bold mb-4">{h1_text}</h1>
             <div class="mb-3"><span class="badge bg-warning text-dark fs-6 px-3 py-2 rounded-pill fw-bold"><i class="fas fa-tag me-1"></i> Installation Rate from RM 26.00 / ft²</span></div>
             <p class="lead col-lg-8 mx-auto mb-5 text-light">
-                Professional roller shutter installation, automated motor repairs, and urgent 24/7 maintenance tailored for commercial shoplots, factories, and residential properties in <strong>{area_name}</strong>.
+                Professional roller shutter installation, automated motor repairs, and repair for commercial shoplots, factories, and residential properties in <strong>{area_name}</strong>.
             </p>
             <div class="d-flex justify-content-center gap-3 flex-wrap">
                 <a href="https://wa.me/60174315233?text={wa_text}" class="btn btn-whatsapp btn-lg">
