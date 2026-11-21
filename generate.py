@@ -229,7 +229,65 @@ nearby_map = {
     "wangsa-maju": ["setapak", "setiawangsa", "keramat", "taman-melawati", "ulu-klang", "gombak"],
 }
 
-# 3. 地区场景差异化文案（降低 154 页内容重复度，贴合本地搜索意图）
+# 3. 著名 Mall 与周边地标映射（常见核心区可直接展示具体商场，其余地区自动结合周边区/商业圈生成）
+landmarks_map = {
+    "ampang": ["Ampang Point", "Great Eastern Mall"],
+    "ampang-hilir": ["Great Eastern Mall", "KLCC"],
+    "ara-damansara": ["Citta Mall", "Oasis Square"],
+    "balakong": ["AEON Mall Cheras Selatan", "The Mines"],
+    "bandar-botanic": ["AEON Mall Bukit Tinggi", "GM Klang"],
+    "bandar-bukit-tinggi": ["AEON Mall Bukit Tinggi", "GM Klang"],
+    "bandar-menjalara": ["The Waterfront @ ParkCity", "Lotus's Kepong"],
+    "bandar-sunway": ["Sunway Pyramid", "Sunway Geo Avenue"],
+    "bangi": ["EVO Mall", "Bangi Gateway"],
+    "bangsar": ["Bangsar Village", "Mid Valley Megamall"],
+    "bangsar-south": ["Nexus Bangsar South", "KL Gateway Mall"],
+    "batu-caves": ["Lotus's Selayang", "Batu Caves commercial area"],
+    "bukit-bintang": ["Pavilion KL", "Berjaya Times Square"],
+    "bukit-jalil": ["Pavilion Bukit Jalil", "Aurora Place"],
+    "cheras": ["Cheras LeisureMall", " EkoCheras Mall"],
+    "city-centre": ["Suria KLCC", "Pavilion KL"],
+    "cyberjaya": ["DPULZE Shopping Centre", "Shaftsbury Square"],
+    "damansara-heights": ["DC Mall", "Bangsar"],
+    "desa-parkcity": ["The Waterfront @ ParkCity", "Plaza Arkadia"],
+    "desa-petaling": ["Lotus's Desa Petaling", "Sri Petaling"],
+    "gombak": ["M3 Mall", "Setapak Central"],
+    "kajang": ["Metro Point Complex", "KPJ / Kajang town commercial area"],
+    "kepong": ["AEON Metro Prima", "AEON Big Kepong"],
+    "kl-city": ["Suria KLCC", "Pavilion KL"],
+    "kl-eco-city": ["KL Eco City Mall", "Mid Valley City"],
+    "kl-sentral": ["NU Sentral", "Bangsar"],
+    "klcc": ["Suria KLCC", "Avenue K"],
+    "kota-damansara": ["Sunway Giza Mall", "Strand Mall"],
+    "kota-kemuning": ["Gamuda Walk", "AEON Big Bukit Rimau"],
+    "kuchai-lama": ["NSK Kuchai Lama", "Mid Valley City"],
+    "mid-valley-city": ["Mid Valley Megamall", "The Gardens Mall"],
+    "mont-kiara": ["1 Mont Kiara", "Publika Shopping Gallery"],
+    "mutiara-damansara": ["The Curve", "IPC Shopping Centre"],
+    "petaling-jaya": ["Atria Shopping Gallery", "3 Damansara"],
+    "puchong": ["IOI Mall Puchong", "Lotus's Puchong"],
+    "rawang": ["AEON Mall Rawang", "Anggun Rawang"],
+    "selayang": ["Selayang Mall", "Lotus's Selayang"],
+    "semenyih": ["Econsave Semenyih", "Lotus's Semenyih"],
+    "seri-kembangan": ["The Mines", "AEON Mall Seri Kembangan"],
+    "setapak": ["Setapak Central", "Wangsa Walk Mall"],
+    "setia-alam": ["Setia City Mall", "Lotus's Setia Alam"],
+    "setiawangsa": ["AEON Mall AU2", "Wangsa Walk Mall"],
+    "shah-alam": ["AEON Mall Shah Alam", "SACC Mall"],
+    "solaris-dutamas": ["Publika Shopping Gallery", "Solaris Mont Kiara"],
+    "sri-damansara": ["Ativo Plaza", "Kepong"],
+    "sri-hartamas": ["Hartamas Shopping Centre", "Publika Shopping Gallery"],
+    "sri-petaling": ["Endah Parade", "Pavilion Bukit Jalil"],
+    "ss2": ["3 Damansara", "SS2 commercial hub"],
+    "subang-jaya": ["Subang Parade", "Empire Shopping Gallery"],
+    "sungai-besi": ["The Mines", "Sungai Besi commercial area"],
+    "sungai-buloh": ["SB Mall", "Kota Damansara"],
+    "taman-tun-dr-ismail": ["1 Utama Shopping Centre", "TTDI commercial hub"],
+    "usj": ["Da Men Mall", "The Main Place Mall"],
+    "wangsa-maju": ["Wangsa Walk Mall", "AEON Alpha Angle"],
+}
+
+# 4. 地区场景差异化文案（降低 154 页内容重复度，贴合本地搜索意图）
 AREA_ANGLES = [
     (
         "commercial",
@@ -252,6 +310,30 @@ def get_area_body_copy(slug, area_name):
     idx = sum(ord(ch) for ch in slug) % len(AREA_ANGLES)
     _, template_str = AREA_ANGLES[idx]
     return template_str.format(area_name=area_name, price_from=PRICE_FROM)
+
+
+def build_landmarks_html(slug, area_name):
+    """为子页面生成附近著名商场/地标说明（主页不显示）"""
+    if slug in landmarks_map:
+        places_str = " &amp; ".join(landmarks_map[slug])
+        text = f"Convenient coverage near <strong>{places_str}</strong> and surrounding shoplots &amp; commercial rows in {area_name}."
+    else:
+        near_names = [
+            region_lookup[s]
+            for s in nearby_map.get(slug, [])
+            if s in region_lookup
+        ][:2]
+        if near_names:
+            near_str = " &amp; ".join(near_names)
+            text = f"Serving commercial shoplots, workshops, and properties across {area_name}, with easy access toward <strong>{near_str}</strong>."
+        else:
+            text = f"Serving commercial shoplots, workshops, and properties across {area_name} and nearby Selangor &amp; KL hubs."
+
+    return (
+        f'<div class="p-3 bg-light rounded-3 border mb-4 small text-secondary">'
+        f'<i class="fas fa-shopping-bag text-warning me-2"></i><strong>Nearby Landmarks &amp; Malls:</strong> {text}'
+        f'</div>'
+    )
 
 
 def build_nearby_html(current_slug, max_items=6):
@@ -293,7 +375,7 @@ with open("favicon.svg", "w", encoding="utf-8") as f:
     f.write(FAVICON_SVG)
 
 
-# 4. 通用页面模板（不含 FAQ 模块，聚焦核心服务与高转化询盘）
+# 5. 通用页面模板
 PAGE_TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -423,6 +505,8 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
                             <li class="mb-0"><i class="fas fa-check text-warning me-2"></i> New Roller Shutter Supply &amp; Install (From {price_from})</li>
                         </ul>
                     </div>
+
+                    {landmarks_html}
                 </div>
 
                 <div class="col-lg-6">
@@ -487,9 +571,102 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
 </html>
 """
 
-# 5. 拼装主页使用的全部地区卡片 HTML 矩阵
+# 6. 拼装主页使用的全部地区卡片 HTML 矩阵
 all_areas_html_list = [
     f'    <div class="col"><a href="{DOMAIN}/{s}/" class="btn btn-sm btn-outline-secondary w-100 text-truncate">{n}</a></div>'
     for s, n in regions_data
 ]
-combined_all_
+combined_all_areas_html = "\n".join(all_areas_html_list)
+total_areas = len(regions_data)
+
+# 7. 生成根目录主页 (index.html) - 保留全部地区入口（不显示单区地标）
+home_wa_text = urllib.parse.quote(
+    f"Hi {BRAND_NAME}, I need roller shutter service in Selangor / KL (Quote / Repair / Motor)."
+)
+home_html = PAGE_TEMPLATE.format(
+    domain=DOMAIN,
+    brand_name=BRAND_NAME,
+    phone_display=PHONE_DISPLAY,
+    phone_tel=PHONE_TEL,
+    wa_number=WA_NUMBER,
+    price_from=PRICE_FROM,
+    title=f"Roller Shutter Selangor & KL | {PHONE_DISPLAY} CALL HTK Shutter",
+    description=f"Professional roller shutter installation (from {PRICE_FROM}), urgent repair & automated motor services across Selangor & Kuala Lumpur. Fast response!",
+    canonical_url=f"{DOMAIN}/",
+    breadcrumb_second="",
+    area_name="Selangor & KL",
+    h1_text=f"Selangor & KL Roller Shutter {PHONE_DISPLAY} CALL HTK",
+    img_prefix="",
+    wa_text=home_wa_text,
+    area_body_copy=f"Whether you run commercial shoplots, warehouses, or industrial units across Selangor &amp; KL, we provide installation starting from {PRICE_FROM}, urgent repairs, and motor servicing.",
+    landmarks_html="",
+    areas_heading="Serviced Areas in Selangor &amp; Kuala Lumpur",
+    areas_desc="We provide professional roller shutter installation and urgent repair across all major districts and industrial parks in Klang Valley:",
+    areas_button_text="Show All Serviced Areas (查看所有服务地区)",
+    total_count=total_areas,
+    areas_html=combined_all_areas_html
+)
+with open("index.html", "w", encoding="utf-8") as f:
+    f.write(home_html)
+
+# 8. 循环生成各地区子页（底部仅保留附近 6 个地区）& 收集 Sitemap URLs
+sitemap_urls = [f"  <url><loc>{DOMAIN}/</loc><lastmod>{TODAY_STR}</lastmod></url>"]
+
+for slug, name in regions_data:
+    os.makedirs(slug, exist_ok=True)
+    file_path = os.path.join(slug, "index.html")
+    wa_text = urllib.parse.quote(
+        f"Hi {BRAND_NAME}, I need roller shutter service in {name} (Quote / Repair / Motor)."
+    )
+
+    nearby_html, nearby_count = build_nearby_html(slug, max_items=6)
+    area_copy = get_area_body_copy(slug, name)
+    landmarks_html = build_landmarks_html(slug, name)
+
+    breadcrumb_item2 = f""",
+          {{
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Roller Shutter {json_escape(name)}",
+            "item": "{DOMAIN}/{slug}/"
+          }}"""
+
+    sub_html = PAGE_TEMPLATE.format(
+        domain=DOMAIN,
+        brand_name=BRAND_NAME,
+        phone_display=PHONE_DISPLAY,
+        phone_tel=PHONE_TEL,
+        wa_number=WA_NUMBER,
+        price_from=PRICE_FROM,
+        title=f"Roller Shutter {name} | {PHONE_DISPLAY} CALL HTK Shutter",
+        description=f"Professional roller shutter installation (from {PRICE_FROM}), urgent repair and automated motor services in {name}, Selangor & KL. Fast response!",
+        canonical_url=f"{DOMAIN}/{slug}/",
+        breadcrumb_second=breadcrumb_item2,
+        area_name=name,
+        h1_text=f"{name} Roller Shutter {PHONE_DISPLAY} CALL HTK",
+        img_prefix="../",
+        wa_text=wa_text,
+        area_body_copy=area_copy,
+        landmarks_html=landmarks_html,
+        areas_heading=f"Nearby Serviced Areas Around {name}",
+        areas_desc=f"We also cover nearby areas surrounding {name} for roller shutter installation and urgent repair:",
+        areas_button_text="Show Nearby Areas (查看附近服务地区)",
+        total_count=nearby_count,
+        areas_html=nearby_html
+    )
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(sub_html)
+
+    sitemap_urls.append(f"  <url><loc>{DOMAIN}/{slug}/</loc><lastmod>{TODAY_STR}</lastmod></url>")
+
+# 9. 自动生成精准无死链的 sitemap.xml
+sitemap_content = '<?xml version="1.0" encoding="UTF-8"?>\n'
+sitemap_content += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+sitemap_content += "\n".join(sitemap_urls) + "\n"
+sitemap_content += '</urlset>'
+
+with open("sitemap.xml", "w", encoding="utf-8") as f:
+    f.write(sitemap_content)
+
+print(f"成功生成 favicon.svg、主页、{total_areas} 个子页面（每页附近 {6} 个地区），以及对应的 sitemap.xml（{TODAY_STR}）！")
