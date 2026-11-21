@@ -229,7 +229,7 @@ nearby_map = {
     "wangsa-maju": ["setapak", "setiawangsa", "keramat", "taman-melawati", "ulu-klang", "gombak"],
 }
 
-# 3. 著名 Mall 与周边地标映射（常见核心区可直接展示具体商场，其余地区自动结合周边区/商业圈生成）
+# 3. 著名 Mall 与周边地标映射
 landmarks_map = {
     "ampang": ["Ampang Point", "Great Eastern Mall"],
     "ampang-hilir": ["Great Eastern Mall", "KLCC"],
@@ -245,14 +245,14 @@ landmarks_map = {
     "batu-caves": ["Lotus's Selayang", "Batu Caves commercial area"],
     "bukit-bintang": ["Pavilion KL", "Berjaya Times Square"],
     "bukit-jalil": ["Pavilion Bukit Jalil", "Aurora Place"],
-    "cheras": ["Cheras LeisureMall", " EkoCheras Mall"],
+    "cheras": ["Cheras LeisureMall", "EkoCheras Mall"],
     "city-centre": ["Suria KLCC", "Pavilion KL"],
     "cyberjaya": ["DPULZE Shopping Centre", "Shaftsbury Square"],
     "damansara-heights": ["DC Mall", "Bangsar"],
     "desa-parkcity": ["The Waterfront @ ParkCity", "Plaza Arkadia"],
     "desa-petaling": ["Lotus's Desa Petaling", "Sri Petaling"],
     "gombak": ["M3 Mall", "Setapak Central"],
-    "kajang": ["Metro Point Complex", "KPJ / Kajang town commercial area"],
+    "kajang": ["Metro Point Complex", "Kajang town commercial area"],
     "kepong": ["AEON Metro Prima", "AEON Big Kepong"],
     "kl-city": ["Suria KLCC", "Pavilion KL"],
     "kl-eco-city": ["KL Eco City Mall", "Mid Valley City"],
@@ -287,7 +287,7 @@ landmarks_map = {
     "wangsa-maju": ["Wangsa Walk Mall", "AEON Alpha Angle"],
 }
 
-# 4. 地区场景差异化文案（降低 154 页内容重复度，贴合本地搜索意图）
+# 4. 地区场景差异化文案
 AREA_ANGLES = [
     (
         "commercial",
@@ -365,7 +365,7 @@ def json_escape(text):
     return text.replace("\\", "\\\\").replace('"', '\\"').replace("\n", " ")
 
 
-# 生成根目录的 favicon.svg 文件（确保 Googlebot 能抓取到独立图标文件）
+# 生成根目录的 favicon.svg 文件
 FAVICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <rect width="100" height="100" rx="20" fill="#d97706"/>
   <text x="50%" y="54%" font-family="Arial, sans-serif" font-size="56" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">H</text>
@@ -391,8 +391,6 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
     <meta property="og:type" content="website">
 
     <link rel="icon" href="{domain}/favicon.svg" type="image/svg+xml">
-    <link rel="icon" href="{domain}/favicon.png" sizes="96x96" type="image/png">
-    <link rel="shortcut icon" href="{domain}/favicon.ico">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -533,17 +531,8 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
         <section class="py-5 bg-light border-top mt-5">
             <div class="container text-center">
                 <h4 class="fw-bold mb-3 text-dark"><i class="fas fa-map-marked-alt text-warning me-2"></i>{areas_heading}</h4>
-                <p class="text-muted small mb-3">{areas_desc}</p>
-
-                <button class="btn btn-warning fw-bold text-dark rounded-pill px-4" type="button" data-bs-toggle="collapse" data-bs-target="#allServicedAreas" aria-expanded="false" aria-controls="allServicedAreas">
-                    {areas_button_text} ({total_count})
-                </button>
-
-                <div class="collapse mt-4" id="allServicedAreas">
-                    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-3 g-2 justify-content-center">
-                        {areas_html}
-                    </div>
-                </div>
+                <p class="text-muted small mb-4">{areas_desc}</p>
+                {areas_block}
             </div>
         </section>
     </main>
@@ -579,7 +568,17 @@ all_areas_html_list = [
 combined_all_areas_html = "\n".join(all_areas_html_list)
 total_areas = len(regions_data)
 
-# 7. 生成根目录主页 (index.html) - 保留全部地区入口（不显示单区地标）
+# 主页地区区块（保留折叠展示 154 个地区）
+home_areas_block = f"""<button class="btn btn-warning fw-bold text-dark rounded-pill px-4" type="button" data-bs-toggle="collapse" data-bs-target="#allServicedAreas" aria-expanded="false" aria-controls="allServicedAreas">
+                    Show All Serviced Areas ({total_areas})
+                </button>
+                <div class="collapse mt-4" id="allServicedAreas">
+                    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-3 g-2 justify-content-center">
+                        {combined_all_areas_html}
+                    </div>
+                </div>"""
+
+# 7. 生成根目录主页 (index.html)
 home_wa_text = urllib.parse.quote(
     f"Hi {BRAND_NAME}, I need roller shutter service in Selangor / KL (Quote / Repair / Motor)."
 )
@@ -602,14 +601,12 @@ home_html = PAGE_TEMPLATE.format(
     landmarks_html="",
     areas_heading="Serviced Areas in Selangor &amp; Kuala Lumpur",
     areas_desc="We provide professional roller shutter installation and urgent repair across all major districts and industrial parks in Klang Valley:",
-    areas_button_text="Show All Serviced Areas (查看所有服务地区)",
-    total_count=total_areas,
-    areas_html=combined_all_areas_html
+    areas_block=home_areas_block
 )
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(home_html)
 
-# 8. 循环生成各地区子页（底部仅保留附近 6 个地区）& 收集 Sitemap URLs
+# 8. 循环生成各地区子页（底部默认平铺展示附近 6 个地区）& 收集 Sitemap URLs
 sitemap_urls = [f"  <url><loc>{DOMAIN}/</loc><lastmod>{TODAY_STR}</lastmod></url>"]
 
 for slug, name in regions_data:
@@ -619,9 +616,13 @@ for slug, name in regions_data:
         f"Hi {BRAND_NAME}, I need roller shutter service in {name} (Quote / Repair / Motor)."
     )
 
-    nearby_html, nearby_count = build_nearby_html(slug, max_items=6)
+    nearby_html, _ = build_nearby_html(slug, max_items=6)
     area_copy = get_area_body_copy(slug, name)
     landmarks_html = build_landmarks_html(slug, name)
+
+    sub_areas_block = f"""<div class="row row-cols-2 row-cols-md-3 row-cols-lg-3 g-2 justify-content-center">
+                    {nearby_html}
+                </div>"""
 
     breadcrumb_item2 = f""",
           {{
@@ -650,9 +651,7 @@ for slug, name in regions_data:
         landmarks_html=landmarks_html,
         areas_heading=f"Nearby Serviced Areas Around {name}",
         areas_desc=f"We also cover nearby areas surrounding {name} for roller shutter installation and urgent repair:",
-        areas_button_text="Show Nearby Areas (查看附近服务地区)",
-        total_count=nearby_count,
-        areas_html=nearby_html
+        areas_block=sub_areas_block
     )
 
     with open(file_path, "w", encoding="utf-8") as f:
@@ -669,4 +668,4 @@ sitemap_content += '</urlset>'
 with open("sitemap.xml", "w", encoding="utf-8") as f:
     f.write(sitemap_content)
 
-print(f"成功生成 favicon.svg、主页、{total_areas} 个子页面（每页附近 {6} 个地区），以及对应的 sitemap.xml（{TODAY_STR}）！")
+print(f"成功生成 favicon.svg、主页、{total_areas} 个子页面（底部默认平铺附近 6 个地区），以及对应的 sitemap.xml（{TODAY_STR}）！")
