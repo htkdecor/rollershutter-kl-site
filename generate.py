@@ -1,7 +1,14 @@
+from datetime import date
 import os
 import urllib.parse
 
 DOMAIN = "https://rollershutter.htkdecor.com.my"
+PHONE_DISPLAY = "017-431 5233"
+PHONE_TEL = "0174315233"
+WA_NUMBER = "60174315233"
+PRICE_FROM = "RM 26.00 / ft²"
+BRAND_NAME = "HTK Pintu Shutter"
+TODAY_STR = date.today().isoformat()
 
 # 1. 已整理、去重并生成标准 URL Slug 的 Kuala Lumpur & Selangor 全地区列表（共 154 个）
 regions_data = [
@@ -222,7 +229,29 @@ nearby_map = {
     "wangsa-maju": ["setapak", "setiawangsa", "keramat", "taman-melawati", "ulu-klang", "gombak"],
 }
 
+# 3. 地区场景差异化文案（降低 154 页内容重复度，贴合本地搜索意图）
+AREA_ANGLES = [
+    (
+        "commercial",
+        "Whether you run a retail shoplot, F&amp;B outlet, or showroom in {area_name}, a jammed or faulty roller shutter disrupts daily operations. We handle new installations, spring/slat repairs, and motor upgrades cleanly and promptly."
+    ),
+    (
+        "industrial",
+        "Warehouses, workshops, and industrial lots around {area_name} rely on durable shutters and smooth motor operation. Our technicians inspect alignment, springs, tracks, and control units to get heavy shutters moving reliably again."
+    ),
+    (
+        "mixed",
+        "From shopfronts and garages to commercial units in {area_name}, we provide straightforward pricing starting from {price_from}, urgent breakdown repairs, and reliable automated shutter motor solutions across Selangor &amp; KL."
+    )
+]
+
 region_lookup = {slug: name for slug, name in regions_data}
+
+
+def get_area_body_copy(slug, area_name):
+    idx = sum(ord(ch) for ch in slug) % len(AREA_ANGLES)
+    _, template_str = AREA_ANGLES[idx]
+    return template_str.format(area_name=area_name, price_from=PRICE_FROM)
 
 
 def build_nearby_html(current_slug, max_items=6):
@@ -250,6 +279,10 @@ def build_nearby_html(current_slug, max_items=6):
     return "\n".join(cards), len(selected_slugs)
 
 
+def json_escape(text):
+    return text.replace("\\", "\\\\").replace('"', '\\"').replace("\n", " ")
+
+
 # 生成根目录的 favicon.svg 文件（确保 Googlebot 能抓取到独立图标文件）
 FAVICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <rect width="100" height="100" rx="20" fill="#d97706"/>
@@ -260,7 +293,7 @@ with open("favicon.svg", "w", encoding="utf-8") as f:
     f.write(FAVICON_SVG)
 
 
-# 3. 通用页面模板
+# 4. 通用页面模板（不含 FAQ 模块，聚焦核心服务与高转化询盘）
 PAGE_TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -298,9 +331,9 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
       {{
         "@context": "https://schema.org",
         "@type": "LocalBusiness",
-        "name": "HTK Pintu Shutter - {area_name}",
-        "telephone": "+60174315233",
-        "priceRange": "From RM 26.00 / ft²",
+        "name": "{brand_name} - {area_name}",
+        "telephone": "+{wa_number}",
+        "priceRange": "From {price_from}",
         "address": {{
           "@type": "PostalAddress",
           "addressLocality": "{area_name}",
@@ -330,18 +363,18 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
     <div class="top-bar py-2 px-3 d-none d-md-block">
         <div class="container d-flex justify-content-between align-items-center">
             <span><i class="fas fa-map-marker-alt text-warning me-2"></i>Serving {area_name}, Selangor &amp; Kuala Lumpur</span>
-            <span><i class="fas fa-phone-alt text-warning me-2"></i> Call Direct: <a href="tel:0174315233" class="text-white text-decoration-none fw-bold">017-431 5233</a></span>
+            <span><i class="fas fa-phone-alt text-warning me-2"></i> Call Direct: <a href="tel:{phone_tel}" class="text-white text-decoration-none fw-bold">{phone_display}</a></span>
         </div>
     </div>
 
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-3 sticky-top">
         <div class="container">
             <a class="navbar-brand fw-bold text-dark" href="{domain}/">
-                <i class="fas fa-store text-warning me-2"></i> HTK Pintu Shutter | {area_name}
+                <i class="fas fa-store text-warning me-2"></i> {brand_name} | {area_name}
             </a>
             <div>
                 <a href="{domain}/" class="btn btn-outline-secondary btn-sm rounded-pill px-3 me-2">Home</a>
-                <a href="https://wa.me/60174315233?text={wa_text}" class="btn btn-success btn-sm rounded-pill px-3"><i class="fab fa-whatsapp me-1"></i> WhatsApp</a>
+                <a href="https://wa.me/{wa_number}?text={wa_text}" class="btn btn-success btn-sm rounded-pill px-3"><i class="fab fa-whatsapp me-1"></i> WhatsApp</a>
             </div>
         </div>
     </nav>
@@ -350,16 +383,16 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
         <div class="container">
             <span class="hero-badge mb-3"><i class="fas fa-map-marker-alt me-1"></i> {area_name} Specialist</span>
             <h1 class="display-4 fw-bold mb-4">{h1_text}</h1>
-            <div class="mb-3"><span class="badge bg-warning text-dark fs-6 px-3 py-2 rounded-pill fw-bold"><i class="fas fa-tag me-1"></i> Installation Rate from RM 26.00 / ft²</span></div>
+            <div class="mb-3"><span class="badge bg-warning text-dark fs-6 px-3 py-2 rounded-pill fw-bold"><i class="fas fa-tag me-1"></i> Installation Rate from {price_from}</span></div>
             <p class="lead col-lg-8 mx-auto mb-5 text-light">
-                Professional roller shutter installation, automated motor repairs, and repair for commercial shoplots, factories, and residential properties in <strong>{area_name}</strong>.
+                Professional roller shutter installation, automated motor repairs, and urgent repair for commercial shoplots, factories, and residential properties in <strong>{area_name}</strong>.
             </p>
             <div class="d-flex justify-content-center gap-3 flex-wrap">
-                <a href="https://wa.me/60174315233?text={wa_text}" class="btn btn-whatsapp btn-lg">
-                    <i class="fab fa-whatsapp me-2"></i> WhatsApp for Quote
+                <a href="https://wa.me/{wa_number}?text={wa_text}" class="btn btn-whatsapp btn-lg">
+                    <i class="fab fa-whatsapp me-2"></i> WhatsApp for Fast Quote
                 </a>
-                <a href="tel:0174315233" class="btn btn-phone btn-lg">
-                    <i class="fas fa-phone-alt me-2"></i> Call: 017-431 5233
+                <a href="tel:{phone_tel}" class="btn btn-phone btn-lg">
+                    <i class="fas fa-phone-alt me-2"></i> Call: {phone_display}
                 </a>
             </div>
         </div>
@@ -378,8 +411,8 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
                         </div>
                     </div>
 
-                    <h2 class="fw-bold mb-4">Reliable Shutter Services in {area_name}</h2>
-                    <p class="mb-4">Operating a shoplot, warehouse, or factory in {area_name}? When your roller shutter jams or needs an automated motor upgrade, our technical team provides rapid on-site troubleshooting across Selangor &amp; KL.</p>
+                    <h2 class="fw-bold mb-3">Reliable Shutter Services in {area_name}</h2>
+                    <p class="mb-4">{area_body_copy}</p>
 
                     <div class="p-4 bg-white rounded-4 shadow-sm border-start border-warning border-4 mb-4">
                         <p class="fw-bold mb-2 text-dark"><i class="fas fa-tools text-warning me-2"></i>Our Shutter Solutions in {area_name}:</p>
@@ -387,7 +420,7 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
                             <li class="mb-2"><i class="fas fa-check text-warning me-2"></i> Heavy-Duty Industrial &amp; Commercial Roller Shutters</li>
                             <li class="mb-2"><i class="fas fa-check text-warning me-2"></i> Urgent Roller Shutter Repair, Spring &amp; Slat Replacement</li>
                             <li class="mb-2"><i class="fas fa-check text-warning me-2"></i> Automated Motor &amp; Remote Control Setup</li>
-                            <li class="mb-0"><i class="fas fa-check text-warning me-2"></i> New Roller Shutter Supply &amp; Install (From RM 26.00 / ft²)</li>
+                            <li class="mb-0"><i class="fas fa-check text-warning me-2"></i> New Roller Shutter Supply &amp; Install (From {price_from})</li>
                         </ul>
                     </div>
                 </div>
@@ -395,13 +428,18 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
                 <div class="col-lg-6">
                     <div class="bg-white p-5 rounded-4 shadow-sm border text-center">
                         <span class="badge bg-warning text-dark fw-bold mb-2 px-3 py-2 rounded-pill">Fast On-Site Response</span>
-                        <h3 class="fw-bold mb-3">Need Immediate Assistance?</h3>
-                        <p class="text-muted mb-4">Send us your shutter dimensions or issue via WhatsApp for a fast quotation in {area_name}.</p>
-                        <a href="https://wa.me/60174315233?text={wa_text}" class="btn btn-whatsapp btn-lg w-100 mb-3">
-                            <i class="fab fa-whatsapp me-2"></i> Chat on WhatsApp Now
+                        <h3 class="fw-bold mb-3">Get a Quote or Fix in {area_name}</h3>
+                        <p class="text-muted mb-3">Snap a photo of your shutter or share approximate width &times; height on WhatsApp—no complicated steps.</p>
+                        <div class="text-start bg-light rounded-3 p-3 mb-4 small text-secondary">
+                            <div class="mb-1"><i class="fas fa-check-circle text-success me-2"></i><strong>New Installation:</strong> Share rough size &amp; location</div>
+                            <div class="mb-1"><i class="fas fa-check-circle text-success me-2"></i><strong>Jammed / Broken Spring:</strong> Snap a photo of the shutter</div>
+                            <div><i class="fas fa-check-circle text-success me-2"></i><strong>Motor / Remote Issue:</strong> Tell us what happened</div>
+                        </div>
+                        <a href="https://wa.me/{wa_number}?text={wa_text}" class="btn btn-whatsapp btn-lg w-100 mb-3">
+                            <i class="fab fa-whatsapp me-2"></i> Send Photo / Quote on WhatsApp
                         </a>
-                        <a href="tel:0174315233" class="btn btn-outline-dark btn-lg w-100 rounded-pill">
-                            <i class="fas fa-phone-alt me-2"></i> Call 017-431 5233
+                        <a href="tel:{phone_tel}" class="btn btn-outline-dark btn-lg w-100 rounded-pill">
+                            <i class="fas fa-phone-alt me-2"></i> Call {phone_display}
                         </a>
                     </div>
                 </div>
@@ -428,18 +466,18 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
 
     <footer class="bg-dark text-white py-4 text-center small">
         <div class="container">
-            <p class="mb-1 text-light">Hotline: <a href="tel:0174315233" class="text-warning text-decoration-none fw-bold">017-431 5233</a></p>
-            <p class="mb-0 text-light opacity-75">&copy; 2026 HTK Pintu Shutter. {area_name} Roller Shutter Specialist.</p>
+            <p class="mb-1 text-light">Hotline: <a href="tel:{phone_tel}" class="text-warning text-decoration-none fw-bold">{phone_display}</a></p>
+            <p class="mb-0 text-light opacity-75">&copy; 2026 {brand_name}. {area_name} Roller Shutter Specialist.</p>
         </div>
     </footer>
 
     <div class="mobile-bottom-bar d-md-none">
         <div class="row g-2">
             <div class="col-6">
-                <a href="tel:0174315233" class="btn btn-dark w-100 rounded-pill fw-bold py-2"><i class="fas fa-phone-alt me-1 text-warning"></i> Call Now</a>
+                <a href="tel:{phone_tel}" class="btn btn-dark w-100 rounded-pill fw-bold py-2"><i class="fas fa-phone-alt me-1 text-warning"></i> Call Now</a>
             </div>
             <div class="col-6">
-                <a href="https://wa.me/60174315233?text={wa_text}" class="btn btn-success w-100 rounded-pill fw-bold py-2"><i class="fab fa-whatsapp me-1"></i> WhatsApp</a>
+                <a href="https://wa.me/{wa_number}?text={wa_text}" class="btn btn-success w-100 rounded-pill fw-bold py-2"><i class="fab fa-whatsapp me-1"></i> WhatsApp</a>
             </div>
         </div>
     </div>
@@ -449,82 +487,9 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
 </html>
 """
 
-# 4. 拼装主页使用的全部地区卡片 HTML 矩阵
+# 5. 拼装主页使用的全部地区卡片 HTML 矩阵
 all_areas_html_list = [
     f'    <div class="col"><a href="{DOMAIN}/{s}/" class="btn btn-sm btn-outline-secondary w-100 text-truncate">{n}</a></div>'
     for s, n in regions_data
 ]
-combined_all_areas_html = "\n".join(all_areas_html_list)
-total_areas = len(regions_data)
-
-# 5. 生成根目录主页 (index.html) - 保留全部地区入口
-home_wa_text = urllib.parse.quote("Hi, I need roller shutter service in Selangor / KL")
-home_html = PAGE_TEMPLATE.format(
-    domain=DOMAIN,
-    title="Roller Shutter Selangor & KL | 017-431 5233 CALL HTK Shutter",
-    description="Professional roller shutter installation (from RM 26/ft²), urgent repair & automated motor services across Selangor & Kuala Lumpur. Fast response!",
-    canonical_url=f"{DOMAIN}/",
-    breadcrumb_second="",
-    area_name="Selangor & KL",
-    h1_text="Selangor & KL Roller Shutter 017-431 5233 CALL HTK",
-    img_prefix="",
-    wa_text=home_wa_text,
-    areas_heading="Serviced Areas in Selangor &amp; Kuala Lumpur",
-    areas_desc="We provide professional roller shutter installation and urgent repair across all major districts and industrial parks in Klang Valley:",
-    areas_button_text="Show All Serviced Areas (查看所有服务地区)",
-    total_count=total_areas,
-    areas_html=combined_all_areas_html
-)
-with open("index.html", "w", encoding="utf-8") as f:
-    f.write(home_html)
-
-# 6. 循环生成各地区子页（底部仅保留附近 6 个地区）& 收集 Sitemap URLs
-sitemap_urls = [f"  <url><loc>{DOMAIN}/</loc></url>"]
-
-for slug, name in regions_data:
-    os.makedirs(slug, exist_ok=True)
-    file_path = os.path.join(slug, "index.html")
-    wa_text = urllib.parse.quote(f"Hi, I need roller shutter service in {name}")
-
-    nearby_html, nearby_count = build_nearby_html(slug, max_items=6)
-
-    breadcrumb_item2 = f""",
-          {{
-            "@type": "ListItem",
-            "position": 2,
-            "name": "Roller Shutter {name}",
-            "item": "{DOMAIN}/{slug}/"
-          }}"""
-
-    sub_html = PAGE_TEMPLATE.format(
-        domain=DOMAIN,
-        title=f"Roller Shutter {name} | 017-431 5233 CALL HTK Shutter",
-        description=f"Professional roller shutter installation (from RM 26/ft²), urgent repair and automated motor services in {name}, Selangor & KL. Fast response!",
-        canonical_url=f"{DOMAIN}/{slug}/",
-        breadcrumb_second=breadcrumb_item2,
-        area_name=name,
-        h1_text=f"{name} Roller Shutter 017-431 5233 CALL HTK",
-        img_prefix="../",
-        wa_text=wa_text,
-        areas_heading=f"Nearby Serviced Areas Around {name}",
-        areas_desc=f"We also cover nearby areas surrounding {name} for roller shutter installation and urgent repair:",
-        areas_button_text="Show Nearby Areas (查看附近服务地区)",
-        total_count=nearby_count,
-        areas_html=nearby_html
-    )
-
-    with open(file_path, "w", encoding="utf-8") as f:
-        f.write(sub_html)
-
-    sitemap_urls.append(f"  <url><loc>{DOMAIN}/{slug}/</loc></url>")
-
-# 7. 自动生成精准无死链的 sitemap.xml
-sitemap_content = '<?xml version="1.0" encoding="UTF-8"?>\n'
-sitemap_content += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-sitemap_content += "\n".join(sitemap_urls) + "\n"
-sitemap_content += '</urlset>'
-
-with open("sitemap.xml", "w", encoding="utf-8") as f:
-    f.write(sitemap_content)
-
-print(f"成功生成 favicon.svg、主页、{total_areas} 个子页面（每页附近 {6} 个地区），以及对应的 sitemap.xml！")
+combined_all_
