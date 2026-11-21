@@ -250,6 +250,16 @@ def build_nearby_html(current_slug, max_items=6):
     return "\n".join(cards), len(selected_slugs)
 
 
+# 生成根目录的 favicon.svg 文件（确保 Googlebot 能抓取到独立图标文件）
+FAVICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect width="100" height="100" rx="20" fill="#d97706"/>
+  <text x="50%" y="54%" font-family="Arial, sans-serif" font-size="56" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">H</text>
+</svg>
+"""
+with open("favicon.svg", "w", encoding="utf-8") as f:
+    f.write(FAVICON_SVG)
+
+
 # 3. 通用页面模板
 PAGE_TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
@@ -265,7 +275,10 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
     <meta property="og:url" content="{canonical_url}">
     <meta property="og:type" content="website">
 
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23d97706'/><text x='50%' y='54%' font-size='56' font-weight='bold' fill='white' text-anchor='middle' dominant-baseline='middle'>H</text></svg>">    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="{domain}/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="{domain}/favicon.png" sizes="96x96" type="image/png">
+    <link rel="shortcut icon" href="{domain}/favicon.ico">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <script type="application/ld+json">
@@ -514,4 +527,4 @@ sitemap_content += '</urlset>'
 with open("sitemap.xml", "w", encoding="utf-8") as f:
     f.write(sitemap_content)
 
-print(f"成功生成主页、{total_areas} 个子页面（每页附近 {6} 个地区），以及对应的 sitemap.xml！")
+print(f"成功生成 favicon.svg、主页、{total_areas} 个子页面（每页附近 {6} 个地区），以及对应的 sitemap.xml！")
